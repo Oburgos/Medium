@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard.elastic.oburgos.com
+spec:
+  issuerRef:
+    name: letsencrypt-cluster-issuer
+    kind: ClusterIssuer
+  secretName: tls.wildcard.elastic.oburgos.com
+  dnsNames:
+    - "*.elastic.oburgos.com"
+  privateKey:
+    rotationPolicy: Always

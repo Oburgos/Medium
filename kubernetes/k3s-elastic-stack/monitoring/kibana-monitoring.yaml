@@ -1,0 +1,55 @@
+apiVersion: kibana.k8s.elastic.co/v1
+kind: Kibana
+metadata:
+  name: monitoring
+spec:
+  version: 7.14.0
+  count: 1
+  elasticsearchRef:
+    name: "monitoring"
+  # config:
+  #   server.publicBaseUrl: "https://kibana-monitoring.elastic.oburgos.com:31562"
+  # http:
+  #   tls:
+  #     certificate:
+  #       secretName: tls.wildcard.elastic.oburgos.com
+  podTemplate:
+    spec:
+      containers:
+        - name: kibana
+          resources:
+            requests:
+              memory: 512Mi
+              cpu: 50m
+            limits:
+              memory: 1Gi
+              cpu: 200m
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    kibana.k8s.elastic.co/name: "monitoring"
+                topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    common.k8s.elastic.co/type: kibana
+    kibana.k8s.elastic.co/name: monitoring
+  name: monitoring-kb-http-external
+  namespace: default
+spec:
+  type: NodePort
+  ports:
+    - name: https
+      port: 5601
+      protocol: TCP
+      targetPort: 5601
+      nodePort: 31562
+  selector:
+    common.k8s.elastic.co/type: kibana
+    kibana.k8s.elastic.co/name: monitoring

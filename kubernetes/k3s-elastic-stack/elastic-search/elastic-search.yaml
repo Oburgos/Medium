@@ -1,0 +1,122 @@
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  name: quickstart
+spec:
+  version: 7.14.0
+  # monitoring:
+  #   metrics:
+  #     elasticsearchRefs:
+  #       - name: monitoring
+  #   logs:
+  #     elasticsearchRefs:
+  #       - name: monitoring
+  nodeSets:
+    - name: tiebreaker
+      count: 1
+      config:
+        node.roles: ["master", "voting_only"]
+        xpack.ml.enabled: false
+      volumeClaimTemplates:
+        - metadata:
+            name: elasticsearch-data
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 10Gi
+            storageClassName: local-path
+      podTemplate:
+        spec:
+          nodeSelector:
+            datacenter: dc-2
+          initContainers:
+            - name: sysctl
+              securityContext:
+                privileged: true
+              command: ["sh", "-c", "sysctl -w vm.max_map_count=262144"]
+          containers:
+            - name: elasticsearch
+              env:
+                - name: ES_JAVA_OPTS
+                  value: -Xms1g -Xmx1g
+              resources:
+                requests:
+                  memory: 2Gi
+                  cpu: 500m
+                limits:
+                  cpu: 1
+                  memory: 2Gi
+    - name: dc-1
+      count: 1
+      config:
+        node.roles: ["master", "data", "ingest", "ml", "transform"]
+        xpack.ml.enabled: false
+      volumeClaimTemplates:
+        - metadata:
+            name: elasticsearch-data
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 250Gi
+            storageClassName: local-path
+      podTemplate:
+        spec:
+          nodeSelector:
+            datacenter: dc-1
+          initContainers:
+            - name: sysctl
+              securityContext:
+                privileged: true
+              command: ["sh", "-c", "sysctl -w vm.max_map_count=262144"]
+          containers:
+            - name: elasticsearch
+              env:
+                - name: ES_JAVA_OPTS
+                  value: -Xms5g -Xmx5g
+              resources:
+                requests:
+                  memory: 10Gi
+                  cpu: 3
+                limits:
+                  cpu: 3
+                  memory: 10Gi
+    - name: dc-3
+      count: 1
+      config:
+        node.roles: ["master", "data", "ingest", "ml", "transform"]
+        xpack.ml.enabled: false
+      volumeClaimTemplates:
+        - metadata:
+            name: elasticsearch-data
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 250Gi
+            storageClassName: local-path
+      podTemplate:
+        spec:
+          nodeSelector:
+            datacenter: dc-3
+          initContainers:
+            - name: sysctl
+              securityContext:
+                privileged: true
+              command: ["sh", "-c", "sysctl -w vm.max_map_count=262144"]
+          containers:
+            - name: elasticsearch
+              env:
+                - name: ES_JAVA_OPTS
+                  value: -Xms5g -Xmx5g
+              resources:
+                requests:
+                  memory: 10Gi
+                  cpu: 3
+                limits:
+                  cpu: 3
+                  memory: 10Gi

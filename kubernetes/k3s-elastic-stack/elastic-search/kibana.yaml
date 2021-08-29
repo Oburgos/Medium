@@ -1,0 +1,67 @@
+apiVersion: kibana.k8s.elastic.co/v1
+kind: Kibana
+metadata:
+  name: quickstart
+spec:
+  version: 7.14.0
+  count: 1
+  elasticsearchRef:
+    name: "quickstart"
+  enterpriseSearchRef:
+    name: "quickstart"
+  # monitoring:
+  #   metrics:
+  #     elasticsearchRefs:
+  #     - name: monitoring
+  #   logs:
+  #     elasticsearchRefs:
+  #     - name: monitoring
+  # config:
+  #   enterpriseSearch.host: "https://enterprise-search.elastic.oburgos.com:30002"
+  #   enterpriseSearch.ssl.verificationMode: none
+  #   enterpriseSearch.ssl.certificateAuthorities: ""
+  #   server.publicBaseUrl: "https://kibana.elastic.oburgos.com:30560"
+  # http:
+  #   tls:
+  #     certificate:
+  #       secretName: tls.wildcard.elastic.oburgos.com
+  podTemplate:
+    spec:
+      containers:
+        - name: kibana
+          resources:
+            requests:
+              memory: 512Mi
+              cpu: 0.5
+            limits:
+              memory: 1Gi
+              cpu: 1
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    kibana.k8s.elastic.co/name: quickstart
+                topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    common.k8s.elastic.co/type: kibana
+    kibana.k8s.elastic.co/name: quickstart
+  name: quickstart-kb-http-external
+  namespace: default
+spec:
+  type: NodePort
+  ports:
+    - name: https
+      port: 5601
+      protocol: TCP
+      targetPort: 5601
+      nodePort: 30560
+  selector:
+    common.k8s.elastic.co/type: kibana
+    kibana.k8s.elastic.co/name: quickstart

@@ -1,0 +1,116 @@
+#kubectl get secret monitoring-es-elastic-user -o=jsonpath='{.data.elastic}' | base64 --decode; echo
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  name: monitoring
+spec:
+  version: 7.14.0
+  nodeSets:
+    - name: tiebreaker
+      count: 1
+      config:
+        node.roles: ["master", "voting_only"]
+        xpack.ml.enabled: false
+      volumeClaimTemplates:
+        - metadata:
+            name: elasticsearch-data
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 10Gi
+            storageClassName: local-path
+      podTemplate:
+        spec:
+          nodeSelector:
+            datacenter: dc-2
+          initContainers:
+            - name: sysctl
+              securityContext:
+                privileged: true
+              command: ["sh", "-c", "sysctl -w vm.max_map_count=262144"]
+          containers:
+            - name: elasticsearch
+              env:
+                - name: ES_JAVA_OPTS
+                  value: -Xms1g -Xmx1g
+              resources:
+                requests:
+                  memory: 2Gi
+                  cpu: 500m
+                limits:
+                  cpu: 1
+                  memory: 2Gi
+    - name: dc-1
+      count: 1
+      config:
+        node.roles: ["master", "data", "ingest", "ml", "transform"]
+        xpack.ml.enabled: false
+      volumeClaimTemplates:
+        - metadata:
+            name: elasticsearch-data
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 100Gi
+            storageClassName: local-path
+      podTemplate:
+        spec:
+          nodeSelector:
+            datacenter: dc-1
+          initContainers:
+            - name: sysctl
+              securityContext:
+                privileged: true
+              command: ["sh", "-c", "sysctl -w vm.max_map_count=262144"]
+          containers:
+            - name: elasticsearch
+              env:
+                - name: ES_JAVA_OPTS
+                  value: -Xms2g -Xmx2g
+              resources:
+                requests:
+                  memory: 4Gi
+                  cpu: 1
+                limits:
+                  cpu: 1
+                  memory: 4Gi
+    - name: dc-3
+      count: 1
+      config:
+        node.roles: ["master", "data", "ingest", "ml", "transform"]
+        xpack.ml.enabled: false
+      volumeClaimTemplates:
+        - metadata:
+            name: elasticsearch-data
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 100Gi
+            storageClassName: local-path
+      podTemplate:
+        spec:
+          nodeSelector:
+            datacenter: dc-3
+          initContainers:
+            - name: sysctl
+              securityContext:
+                privileged: true
+              command: ["sh", "-c", "sysctl -w vm.max_map_count=262144"]
+          containers:
+            - name: elasticsearch
+              env:
+                - name: ES_JAVA_OPTS
+                  value: -Xms2g -Xmx2g
+              resources:
+                requests:
+                  memory: 4Gi
+                  cpu: 1
+                limits:
+                  cpu: 1
+                  memory: 4Gi

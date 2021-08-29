@@ -1,0 +1,40 @@
+apiVersion: enterprisesearch.k8s.elastic.co/v1
+kind: EnterpriseSearch
+metadata:
+  name: quickstart
+spec:
+  version: 7.14.0
+  count: 2
+  elasticsearchRef:
+    name: quickstart
+  # config:
+  #   ent_search.external_url: https://enterprise-search.elastic.oburgos.com:30002
+  # http:
+  #   tls:
+  #     certificate:
+  #       secretName: tls.wildcard.elastic.oburgos.com
+  podTemplate:
+    spec:
+      containers:
+        - name: enterprise-search
+          resources:
+            requests:
+              cpu: 2
+              memory: 8Gi
+            limits:
+              cpu: 2
+              memory: 8Gi
+          env:
+            - name: JAVA_OPTS
+              value: -Xms7500m -Xmx7500m
+      nodeSelector:
+        app-search: "true"
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    enterprisesearch.k8s.elastic.co/name: quickstart
+                topologyKey: kubernetes.io/hostname
