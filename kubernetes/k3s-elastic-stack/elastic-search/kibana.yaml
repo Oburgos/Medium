@@ -7,8 +7,8 @@ spec:
   count: 1
   elasticsearchRef:
     name: "quickstart"
-  enterpriseSearchRef:
-    name: "quickstart"
+  # enterpriseSearchRef:
+  #   name: "quickstart"
   # monitoring:
   #   metrics:
   #     elasticsearchRefs:
