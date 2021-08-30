@@ -14,7 +14,7 @@ curl -sfL https://get.k3s.io | sh -s server --cluster-init --token '{token}' --d
 ```
 Otros Servidores
 ```
-curl -sfL https://get.k3s.io | K3S_TOKEN=f94ea67d-379b-4acd-af02-21c5db73a609-59524445 sh -s server --server https://{ip-primer-servidor}
+curl -sfL https://get.k3s.io | K3S_TOKEN={token} sh -s server --server https://{ip-primer-servidor}
 ```
 
 Para dar permisos al usuario ubuntu de leer el archivo de kubernetes
