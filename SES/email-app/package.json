@@ -1,0 +1,15 @@
+{
+  "name": "email-app",
+  "version": "1.0.0",
+  "description": "Script de ejemplo para enviar correos mediante Amazon SES",
+  "main": "index.js",
+  "scripts": {
+    "smtp": "node smtp.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "nodemailer": "^6.7.0"
+  }
+}
