@@ -1,0 +1,11 @@
+global_name_prefix = "chatapp"
+global_tag_tenant = "oburgos"
+ec2_image_id = "ami-083654bd07b5da81d"
+ec2_instance_type = "t3.micro"
+ec2_init_script_path =  "./scripts/install.sh"
+asg_instances_max = 4
+asg_instances_desired = 1
+asg_instances_min = 1
+asg_scaling_policy_cpu_target_value = 40.0
+dns_hostedzone_domain = "oburgos.com"
+dns_record_value = "webappredis.oburgos.com"
