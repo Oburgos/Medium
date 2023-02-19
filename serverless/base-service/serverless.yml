@@ -1,0 +1,39 @@
+service: base-service-api
+frameworkVersion: '3'
+
+plugins:
+  - serverless-offline
+
+custom:
+  prefix: ${opt:stage, 'dev'}-${self:service}
+  firebaseProjectName: ${opt:stage, 'dev'}-oburgos-demo
+  serverless-offline:
+    ignoreJWTSignature: true
+
+provider:
+  name: aws
+  stackName: ${self:custom.prefix}
+  runtime: nodejs18.x
+  region: us-west-2
+  memorySize: 256
+  logRetentionInDays: 30
+  deploymentBucket:
+    name: oburgos-serverless
+  httpApi:
+    authorizers:
+      firebaseAuthorizer:
+        identitySource: $request.header.authorization
+        issuerUrl: https://securetoken.google.com/${self:custom.firebaseProjectName}
+        audience:
+          - ${self:custom.firebaseProjectName}
+
+functions:
+  api:
+    name: ${self:custom.prefix}-get
+    handler: index.handler
+    events:
+      - httpApi:
+          path: /
+          method: get
+          authorizer:
+            name: firebaseAuthorizer
